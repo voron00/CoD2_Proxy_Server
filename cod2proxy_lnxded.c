@@ -2,7 +2,7 @@
 // All rights reserved.
 
 // This source code is licensed under the BSD-style license found in the
-// LICENSE file in the root directory of this source tree. 
+// LICENSE file in the root directory of this source tree.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,7 +21,7 @@
 char HEARTBEAT_MESSAGE[] = "\xFF\xFF\xFF\xFFheartbeat COD-2";
 char AUTHORIZE_MESSAGE[] = "\xFF\xFF\xFF\xFFgetIpAuthorize";
 char DISCONNECT_MESSAGE[] = "\xFF\xFF\xFF\xFF""error\nEXE_DISCONNECTED_FROM_SERVER";
-char SHORTVERSION[4];
+char SHORTVERSION[32];
 char FORWARD_IP[] = "127.0.0.1";
 char FS_GAME[32];
 struct sockaddr_in listen_addr;
@@ -470,6 +470,16 @@ void *listen_thread(void *arg)
 						if(shortversion != NULL)
 							memcpy(shortversion, "\\shortversion\\1.3", 17);
 					}
+					else if(strcmp(SHORTVERSION, "gamepass") == 0)
+					{
+						char *protocol = strstr(buffer, "\\protocol\\115");
+						if(protocol != NULL)
+							memcpy(protocol, "\\protocol\\119", 13);
+
+						char *shortversion = strstr(buffer, "\\shortversion\\1.0");
+						if(shortversion != NULL)
+							memcpy(shortversion, "\\shortversion\\1.3", 17);
+					}
 				}
 				else
 				{
@@ -484,6 +494,12 @@ void *listen_thread(void *arg)
 						char *protocol = strstr(buffer, "\\protocol\\115");
 						if(protocol != NULL)
 							memcpy(protocol, "\\protocol\\118", 13);
+					}
+					else if(strcmp(SHORTVERSION, "gamepass") == 0)
+					{
+						char *protocol = strstr(buffer, "\\protocol\\115");
+						if(protocol != NULL)
+							memcpy(protocol, "\\protocol\\119", 13);
 					}
 				}
 			}
@@ -604,7 +620,8 @@ int main(int argc, char *argv[])
 		socklen_t addr_len = sizeof(addr);
 
 		ssize_t bytes_received = recvfrom(sock, buffer, sizeof(buffer) - 1, 0, (struct sockaddr *)&addr, &addr_len);
-		if(bytes_received >= 0) {
+		if(bytes_received >= 0)
+		{
 			if (bytes_received < sizeof(buffer) - 1)
 				buffer[bytes_received] = '\0';
 			else
@@ -749,7 +766,7 @@ int main(int argc, char *argv[])
 		}
 		else
 			printf("Invalid address: %s\n", inet_ntoa(addr.sin_addr));
-		
+
 		pthread_mutex_unlock(&lock);
 	}
 	return 0;
